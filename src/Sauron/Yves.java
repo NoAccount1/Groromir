@@ -50,7 +50,7 @@ public class Yves extends Thread {
     public void run() {
         try {
 
-            // à déplacer ..........................................................................................................................................
+            // TODO: à déplacer ..........................................................................................................................................
             out.println("" + nbr_dice);
 
             // ajout du nombre de dé à la pool totale de dés
@@ -103,7 +103,7 @@ public class Yves extends Thread {
         // envoie au joueur que le round démarre
         out.println("round_start_ " + nbr_round);
 
-        // début du round (ajout d'une condition d'arrèt) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        // TODO: début du round (ajout d'une condition d'arrèt) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         while (!end_round) {
 
             //sleep pour éviter que des joueurs soit bloqués dans le tour précédent
@@ -135,7 +135,7 @@ public class Yves extends Thread {
             // informe le joueur que c'est son tour
             out.println("Turn");
 
-            // récupèration et traitement de l'input à mettre ailleur !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            // TODO: récupèration et traitement de l'input à mettre ailleur !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             while (!action_valide) {
 
                 // récupération de l'input
