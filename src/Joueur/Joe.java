@@ -39,13 +39,10 @@ public class Joe extends Thread {
                 do {
                     turn = in.readLine();
                     System.out.println(turn);
-                } while (turn != "Turn");
-
-
-
+                } while (!turn.equals("Turn"));
             }
         } catch (IOException e) {
+            e.printStackTrace();
         }
-        ;
     }
 }
