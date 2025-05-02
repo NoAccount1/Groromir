@@ -20,11 +20,31 @@ public class Yves extends Thread {
     static int nbr_round = 1;
     static int joueur_deb_round = 0;
     static int joueur_actif = 0;
-    static int[] last_action = {1, 2};
+    static int[] last_action = {0, 0, 0};
     static int[][] hands = new int[10][10];
     static boolean end_turn = false;
     static boolean end_round = false;
+    static boolean end_game = false;
     static int[] pool = new int[10];
+
+    /*     Initialisation du thread :
+                – envoie de l'id ; str "osef"
+
+            Début round :
+                – envoie info round début : str "osef"
+                – envoie du nombre de dés : str "%d%n"
+                – envoie des dés aux joueurs : str "%d%n" x nombre de dés envoyés au-dessus
+
+            Début tour :
+                – envoie de l'Id du joueur actif
+                – envoie de si c'est le tour du joueur : "Turn" / "NoTurn"
+                – si NoTrun : attendre la din du tour en écoutant
+                – si Turn :
+                    – récupère un input : "str" "Bluff" / "%d %d%n"
+                    – envoie si l'input est valid : "valid input"/"invalid input"
+                        si invlaide recommencer
+                        si valide écouter jusqu'à la fin du tour
+     */
 
     public Yves(int id, Socket client) {
         try {
@@ -60,6 +80,10 @@ public class Yves extends Thread {
         while (!end_game) {
             round();
         }
+
+        for (int i = 0; i < nbr_dice; i++) {
+            out.printf("la partie  est terminée !");
+        }
     }
 
     // fonction qui génère une main de 1 à 5 dés
@@ -76,9 +100,24 @@ public class Yves extends Thread {
         return hand;
     }
 
+    private boolean is_game_ended() {
+
+        int nbr_player_not_dead = 0;
+        for (int i = 0; i < pool.length; i++) {
+            nbr_player_not_dead = i == 0 ? nbr_player_not_dead : nbr_player_not_dead + 1;
+        }
+
+        return (nbr_player_not_dead == 1);
+    }
 
     // fonction qui gère le déroulement d'un round, un ensemble de tour
     private void round() {
+
+        // envoie au joueur que le round démarre
+        out.printf("round_start_ %d%n", nbr_round);
+
+        // envoie du nombre de dés au joueur
+        out.printf("%d%n", nbr_dice);
 
         // génération de la main du joueur pour ce round
         int[] hand = draw(nbr_dice);
@@ -100,8 +139,155 @@ public class Yves extends Thread {
                 err.error("Error in sleep while waiting round", e, ErrorManager.GENERIC_FAILURE);
             }
             end_round = false;
+
             // lancement des tours
             tour();
+        }
+
+        end_game = is_game_ended();
+    }
+
+
+    // fonction qui prend l'input et le transforme en info processable sous forme de tables de 3 int, [0]: bluff ou pas; [1]: nombre d'itération; [2]: chiffre du dé;
+    private void traitement_input() {
+
+        // génération de l'action
+        int[] action = new int[3];
+
+        boolean action_valide = false;
+
+        while (!action_valide) {
+
+            // récupération de l'input
+            try {
+                String input = in.readLine();
+
+                // vérification si c'est un bluff
+                if (input.equals("Bluff")) {
+                    action[0] = 1;
+                    action[1] = last_action[1];
+                    action[2] = last_action[2];
+
+                    // si ce n'est pas un bluff
+                } else {
+
+                    int[] action_tmp = Arrays.stream(input.split(" ")).mapToInt(Integer::parseInt).toArray();
+
+                    // vérifie si l'action est valide
+                    if ((last_action[0] < action_tmp[0] || (last_action[0] == action_tmp[0] && last_action[1] < action_tmp[1])) && action_tmp[1] <= 6) {
+
+                        // si l'action est valide l'intégrer au format
+                        action_valide = true;
+                        System.out.println("valid input");
+                        out.println("valid input");
+                        action[1] = action_tmp[1];
+                        action[2] = action_tmp[2];
+
+                    } else {
+                        // si l'action n'est pas valide recommencer le traitement
+                        out.println("invalid input");
+                    }
+                }
+            } catch (Exception e) {
+                err.error("Error in input section", e, ErrorManager.GENERIC_FAILURE);
+            }
+        }
+        last_action = action;
+    }
+
+    //prends en paramètre une action formatée sous la forme de la fonction au-dessus et fait ce que l'action est sensé faire
+    private void traitement_action(int[] action) {
+        if (!(action[0] == 1)) {
+
+            print_pari(action[1], action[2]);
+
+            // passage du tour au joueur suivant
+            joueur_actif = (joueur_actif + 1) % 3;
+            end_turn = true;
+
+        } else {
+
+            // informe les joueurs que l'action est un bluff
+            for (int i = 0; i < nbr_id.get(); i++) {
+                outs[i].printf("Bluff !%n");
+            }
+
+            // informe les joueurs du nombre réel d'itératon
+            for (int i = 0; i < nbr_id.get(); i++) {
+                outs[i].printf("Il y a %d %d en tout%n", compte_iteration(action[2]), action[2]);
+            }
+
+            solve_bluff(action);
+            joueur_deb_round = joueur_actif;
+            end_turn = true;
+            end_round = true;
+        }
+    }
+
+    // fonction qui compte le nombre d'itération d'un chiffre dans la pool totale
+    private int compte_iteration(int chiffre) {
+
+        // compte le nombre d'itérations d'un chiffre totales dans la pool
+        int nombre_iteration = 0;
+        for (int i = 0; i < nbr_id.get(); i++) {
+            for (int j = 0; j < hands[i].length; j++) {
+                if (hands[i][j] == chiffre) {
+                    nombre_iteration++;
+                }
+            }
+        }
+
+        return nombre_iteration;
+    }
+
+
+    // informe tous les joueurs du pari effectué
+    private void print_pari(int nbr_ite, int chiffre) {
+
+        for (int i = 0; i < nbr_id.get(); i++) {
+            outs[i].printf(
+                    "%s parié qu'il y avait %d %d%n",
+                    i == id ? "Vous avez" : "Le joueur %d a".formatted(id),
+                    nbr_ite,
+                    chiffre
+            );
+        }
+    }
+
+    // verifie que le bluff est valide
+    private boolean check_bluff(int nbr_ite, int nbr_vise) {
+        return nbr_ite < nbr_vise;
+    }
+
+    private void solve_bluff(int[] action) {
+
+        // si le bluff est valide
+        if (check_bluff(compte_iteration(action[2]), action[1])) {
+
+            // préviens les joueurs que le joueur a perdu un dé
+            for (int i = 0; i < nbr_id.get(); i++) {
+                outs[i].printf(
+                        "%s perdu 1 dé !",
+                        i == (id + 2) % 3 ? "Vous avez" : "Le joueur %d a".formatted((id + 2) % 3)
+                );
+            }
+
+            // enlève le dé de la pool
+            pool[(id + 2) % 3]--;
+
+            // si le bluff n'est pas vcalide
+        } else {
+
+            // préviens les joueurs que le joueur a perdu un dé
+            for (int i = 0; i < nbr_id.get(); i++) {
+                outs[i].printf(
+                        "%s perdu 1 dé !",
+                        i == id ? "Vous avez" : "Le joueur %d a".formatted(id)
+                );
+            }
+
+            // enlève le dé de la pool
+            pool[id]--;
         }
     }
 
@@ -109,9 +295,16 @@ public class Yves extends Thread {
 
         // reset des différents booléens
         end_turn = false;
-        boolean Bluff = false;
-        boolean action_valide = false;
 
+        //traitement des joueurs morts
+        while (pool[joueur_actif] == 0) {
+            joueur_actif++;
+        }
+
+        // informe les joueurs du joueur actif
+        for (int i = 0; i < nbr_id.get(); i++) {
+            outs[i].printf("%d%n", joueur_actif);
+        }
 
         // information de à qui est le tour
         out.printf("player_turn %d%n", joueur_actif);
