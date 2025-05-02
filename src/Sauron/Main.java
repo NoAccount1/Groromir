@@ -3,8 +3,11 @@ package Sauron;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.io.*;
+import java.util.logging.ErrorManager;
 
 public class Main {
+    static ErrorManager err = new ErrorManager();
+
     public static void main(String[] args) {
         try {
             ServerSocket ecoute = new ServerSocket(8080);
@@ -15,7 +18,8 @@ public class Main {
                 new Yves(id, client).start();
                 id++;
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
+            err.error("Error in server", e, ErrorManager.GENERIC_FAILURE);
         }
     }
 }

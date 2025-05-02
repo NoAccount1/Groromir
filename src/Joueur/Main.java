@@ -1,28 +1,30 @@
 package Joueur;
 
-import java.io.*;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.*;
 import java.util.Scanner;
 
+import java.util.logging.ErrorManager;
+
 public class Main {
-    public static void main(String[] args) {
+    static ErrorManager err = new ErrorManager();
+
+    public static void main() {
         try {
-            Socket s = new Socket("127.0.0.1", 8080);
-            PrintWriter out = new PrintWriter(s.getOutputStream(), true);
-            new Joe(s).start();
+            Socket socket = new Socket("127.0.0.1", 8080);
+            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+            new Joe(socket).start();
             System.out.println("Connexion réussie!");
-            Scanner sc = new Scanner(System.in);
+            Scanner scanner = new Scanner(System.in);
             String message = "";
             while (!message.equals("quit")) {
-                message = sc.nextLine();
+                message = scanner.nextLine();
                 out.println(message);
             }
-            sc.close();
-            s.close();
+            scanner.close();
+            socket.close();
         } catch (Exception e) {
-            // Traitement d'erreur
+            err.error("Error", e, ErrorManager.GENERIC_FAILURE);
         }
     }
 }
