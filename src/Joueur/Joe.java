@@ -74,6 +74,28 @@ public class Joe extends Thread implements ActionListener {
         frame.setVisible(true);
     }
 
+    /*     Initialisation du thread :
+                – reception de l'id ; str "osef"
+
+            Début round :
+                – reception de  info round début : str "osef"
+                – reception du nombre de dés : str "%d%n"
+                    _stockage
+                – reception des dés du joueurs : str "%d%n" x nombre de dés envoyés au-dessus
+                    _stockage
+                    TODO: affichage
+
+            Début tour :
+                – reception de l'Id du joueur actif
+                – reception de si c'est le tour du joueur : "Turn" / "NoTurn"
+                – si NoTrun : attendre la fin du tour en écoutant
+                – si Turn :
+                    – envoie de l'input : str "Bluff" / "%d %d%n"
+//                    – reception de si l'input est valid : "valid input"/"invalid input"
+                        si invalide recommencer
+                        si valide écouter jusqu'à la fin du tour
+     */
+
     public void run() {
         try {
             UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
@@ -83,6 +105,9 @@ public class Joe extends Thread implements ActionListener {
 
 
         try {
+
+            //System.out.println(in.readLine());
+
             while (true) {
                 System.out.println("# Receive id number");
                 System.out.println(in.readLine());

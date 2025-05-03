@@ -10,9 +10,15 @@ public class Main {
 
     public static void main(String[] args) {
         try {
+
+            // création de la socket
             ServerSocket ecoute = new ServerSocket(8080);
             System.out.println("Server listening on port 8080");
+
+            //initialisation des identifiants
             int id = 0;
+
+
             while (true) {
                 Socket client = ecoute.accept();
                 new Yves(id, client).start();

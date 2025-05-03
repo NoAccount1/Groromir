@@ -56,7 +56,7 @@ public class Yves extends Thread {
                 – envoie de si c'est le tour du joueur : "Turn" / "NoTurn"
                 – si NoTrun : attendre la din du tour en écoutant
                 – si Turn :
-                    – récupère un input : "str" "Bluff" / "%d %d%n"
+                    – récupère un input : strSS "Bluff" / "%d %d%n"
                     – envoie si l'input est valid : "valid input"/"invalid input"
                         si invalide recommencer
                         si valide écouter jusqu'à la fin du tour
@@ -280,6 +280,7 @@ public class Yves extends Thread {
         return nbr_ite < nbr_vise;
     }
 
+    // effectue les action inhérentesau bluff
     private void solve_bluff(int[] action) {
 
         // si le bluff est valide
