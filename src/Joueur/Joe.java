@@ -18,18 +18,6 @@ public class Joe extends Thread implements ActionListener {
     UIManager uiManager = new UIManager();
     BufferedReader in;
 
-    private void print(String x) {
-        print(x);
-    }
-
-    private void print(int x) {
-        print(x);
-    }
-
-    private void printf(String x, Object... objects) {
-        printf(x, objects);
-    }
-
     public Joe(Socket s) throws IOException {
         in = new BufferedReader(new InputStreamReader(s.getInputStream()));
 
@@ -90,40 +78,40 @@ public class Joe extends Thread implements ActionListener {
         try {
             UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
         } catch (Exception e) {
-            printf("Look and Feel not set: %s%n", e.getMessage());
+            System.out.printf("Look and Feel not set: %s%n", e.getMessage());
         }
 
 
         try {
             while (true) {
-                print("# Receive id number");
-                print(in.readLine());
+                System.out.println("# Receive id number");
+                System.out.println(in.readLine());
 
-                print("# Receive round start message");
-                print(in.readLine());
+                System.out.println("# Receive round start message");
+                System.out.println(in.readLine());
 
-                print("# Receive dice number");
+                System.out.println("# Receive dice number");
                 int nbr_dice = Integer.parseInt(in.readLine());
-                printf("Nbr_dice=%d%n", nbr_dice);
+                System.out.printf("Nbr_dice=%d%n", nbr_dice);
 
-                print("# Draw Dices");
+                System.out.println("# Draw Dices");
                 int[] dices = new int[nbr_dice];
                 do {
                     nbr_dice--;
                     dices[nbr_dice] = Integer.parseInt(in.readLine());
-                    print(dices[nbr_dice]);
+                    System.out.println(dices[nbr_dice]);
                 } while (nbr_dice > 0);
 
-                print("# Get active player's turn");
+                System.out.println("# Get active player's turn");
 
-                print("# Get whether or not it is his turn");
+                System.out.println("# Get whether or not it is his turn");
                 String turn = in.readLine();
                 while (in.readLine().equals("NoTurn")) ;
 
 
             }
         } catch (Exception e) {
-            printf("Error during run: %s%n", e.getMessage());
+            System.out.printf("Error during run: %s%n", e.getMessage());
         }
     }
 
