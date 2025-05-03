@@ -34,7 +34,7 @@ public class MainWindow extends JFrame implements ActionListener {
         panel.setLayout(new FlowLayout(FlowLayout.CENTER));
         panel.setBackground(Color.WHITE);
 
-        JLabel label = new JLabel("Perduonline");
+        JLabel label = new JLabel("PerduOnline");
         panel.add(label);
 
         button = new JButton("Cliquez ici !");

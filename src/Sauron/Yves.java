@@ -17,7 +17,7 @@ public class Yves extends Thread {
 
     {
         logger.addHandler(new ConsoleHandler());
-        //* Remove one / at the beginning of the line to enable log files
+        /* Remove one / at the beginning of the line to disable log files
         try {
             logger.addHandler(new FileHandler("Yves.%g.log"));
         } catch (IOException e) {
@@ -42,6 +42,12 @@ public class Yves extends Thread {
     static boolean end_round = false;
     static boolean end_game = false;
     static int[] pool = new int[10];
+    boolean elim = false;
+
+
+    //TODO: améliorer le log
+    //TODO: informer les autres joueurs quand un joueur est éliminé
+
 
     /*     Initialisation du thread :
                 – envoie de l'id ; str "osef"
@@ -96,13 +102,20 @@ public class Yves extends Thread {
 
         // début du jeu
         while (!end_game) {
+
+            //idem que pour avant le nouveau tour
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                err.error("Error in sleep while waiting round", e, ErrorManager.GENERIC_FAILURE);
+            }
+
             round();
         }
 
-        for (int i = 0; i < nbr_dice; i++) {
-            logger.log(Level.INFO, "Fin de la partie");
-            out.printf("la partie  est terminée !");
-        }
+        logger.log(Level.INFO, "Fin de la partie");
+        out.printf("endgame%n");
+
     }
 
     // fonction qui génère une main de 1 à 5 dés
@@ -122,8 +135,8 @@ public class Yves extends Thread {
     private boolean is_game_ended() {
 
         int nbr_player_not_dead = 0;
-        for (int i = 0; i < pool.length; i++) {
-            nbr_player_not_dead = i == 0 ? nbr_player_not_dead : nbr_player_not_dead + 1;
+        for (int j : pool) {
+            nbr_player_not_dead = j == 0 ? nbr_player_not_dead : nbr_player_not_dead + 1;
         }
 
         return (nbr_player_not_dead == 1);
@@ -132,9 +145,23 @@ public class Yves extends Thread {
     // fonction qui gère le déroulement d'un round, un ensemble de tour
     private void round() {
 
+        //actualise le nombre de dés et réinitialisation des actions
+        nbr_dice = pool[id];
+        last_action[0] = 0;
+        last_action[1] = 0;
+        last_action[2] = 0;
+
+        // elimination du joueur si nécessaire
+        if ((nbr_dice == 0) && !elim){
+            elim = true;
+            out.println("out");
+            out.println("vous avez perdu");
+        }
+
         // envoie au joueur que le round démarre
         logger.info("Round %d démarre%n".formatted(nbr_round));
-        out.printf("round_start_ %d%n", nbr_round);
+        out.println("Début round");
+        out.printf("%d%n", nbr_round);
 
         // envoie du nombre de dés au joueur
         logger.info("%d dés envoyés%n".formatted(nbr_dice));
@@ -150,7 +177,7 @@ public class Yves extends Thread {
         for (int i = 0; i < nbr_dice; i++) {
             out.printf("%d%n", hand[i]);
         }
-
+        end_round = false;
         while (!end_round) {
 
             // sleep pour éviter que des joueurs soient bloqués dans le tour précédent
@@ -159,13 +186,17 @@ public class Yves extends Thread {
             } catch (InterruptedException e) {
                 err.error("Error in sleep while waiting round", e, ErrorManager.GENERIC_FAILURE);
             }
-            end_round = false;
 
             // lancement des tours
             tour();
         }
 
         end_game = is_game_ended();
+        if (end_game && nbr_dice != 0) {
+            out.printf("out");
+            out.println("Vous avez gagné !!");
+            elim = true;
+        }
     }
 
 
@@ -188,6 +219,9 @@ public class Yves extends Thread {
                     action[0] = 1;
                     action[1] = last_action[1];
                     action[2] = last_action[2];
+                    action_valide = true;
+                    System.out.println("valid input");
+                    out.println("valid input");
 
                     // si ce n'est pas un bluff
                 } else {
@@ -195,14 +229,14 @@ public class Yves extends Thread {
                     int[] action_tmp = Arrays.stream(input.split(" ")).mapToInt(Integer::parseInt).toArray();
 
                     // vérifie si l'action est valide
-                    if ((last_action[0] < action_tmp[0] || (last_action[0] == action_tmp[0] && last_action[1] < action_tmp[1])) && action_tmp[1] <= 6) {
+                    if ((last_action[1] < action_tmp[0] || (last_action[1] == action_tmp[0] && last_action[2] < action_tmp[1])) && action_tmp[1] <= 6) {
 
                         // si l'action est valide l'intégrer au format
                         action_valide = true;
                         System.out.println("valid input");
                         out.println("valid input");
-                        action[1] = action_tmp[1];
-                        action[2] = action_tmp[2];
+                        action[1] = action_tmp[0];
+                        action[2] = action_tmp[1];
 
                     } else {
                         // si l'action n'est pas valide recommencer le traitement
@@ -218,6 +252,7 @@ public class Yves extends Thread {
 
     //prends en paramètre une action formatée sous la forme de la fonction au-dessus et fait ce que l'action est sensé faire
     private void traitement_action(int[] action) {
+
         if (!(action[0] == 1)) {
 
             print_pari(action[1], action[2]);
@@ -289,27 +324,27 @@ public class Yves extends Thread {
             // préviens les joueurs que le joueur a perdu un dé
             for (int i = 0; i < nbr_id.get(); i++) {
                 outs[i].printf(
-                        "%s perdu 1 dé !",
+                        "%s perdu 1 dé !%n",
                         i == (id + 2) % 3 ? "Vous avez" : "Le joueur %d a".formatted((id + 2) % 3)
                 );
             }
 
             // enlève le dé de la pool
-            pool[(id + 2) % 3]--;
+            pool[(id + 2) % 3] = pool[(id + 2) % 3] - 1;
 
-            // si le bluff n'est pas vcalide
+            // si le bluff n'est pas valide
         } else {
 
             // préviens les joueurs que le joueur a perdu un dé
             for (int i = 0; i < nbr_id.get(); i++) {
                 outs[i].printf(
-                        "%s perdu 1 dé !",
+                        "%s perdu 1 dé !%n",
                         i == id ? "Vous avez" : "Le joueur %d a".formatted(id)
                 );
             }
 
             // enlève le dé de la pool
-            pool[id]--;
+            pool[id] = pool[id] - 1;
         }
     }
 
@@ -320,12 +355,7 @@ public class Yves extends Thread {
 
         //traitement des joueurs morts
         while (pool[joueur_actif] == 0) {
-            joueur_actif++;
-        }
-
-        // informe les joueurs du joueur actif
-        for (int i = 0; i < nbr_id.get(); i++) {
-            outs[i].printf("%d%n", joueur_actif);
+            joueur_actif = (joueur_actif + 1)%3;
         }
 
         // information de à qui est le tour

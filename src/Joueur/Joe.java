@@ -30,6 +30,17 @@ public class Joe extends Thread implements ActionListener {
         text_dice_amount = new JTextField(10);
     }
 
+    //TODO: mettre le scanner dans la fnc jouer_tour pour éviter les problème d'input des joueurs dont c'est pas le tour (ouverture et fermeture du scanner dans la fnc)
+    //TODO: mettre au propre l'affichage des éliminé
+    //TODO: Traiter un ppeu mieux les lectures de keyword (ex: "player_turn 1" -> "C'est le tour du joueur 1"
+    //TODO: UI
+
+    String lecture;
+    int nbr_dice;
+    int[] dices = new int[5];
+    boolean sortie = false;
+    boolean victoire = false;
+
     private void buildUI() {
         frame.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -78,12 +89,12 @@ public class Joe extends Thread implements ActionListener {
                 – reception de l'id ; str "osef"
 
             Début round :
-                – reception de  info round début : str "osef"
+                – reception de  info round début : str "Début round"
                 – reception du nombre de dés : str "%d%n"
                     _stockage
                 – reception des dés du joueurs : str "%d%n" x nombre de dés envoyés au-dessus
                     _stockage
-                    TODO: affichage
+                    _affichage
 
             Début tour :
                 – reception de l'Id du joueur actif
@@ -91,10 +102,49 @@ public class Joe extends Thread implements ActionListener {
                 – si NoTrun : attendre la fin du tour en écoutant
                 – si Turn :
                     – envoie de l'input : str "Bluff" / "%d %d%n"
-//                    – reception de si l'input est valid : "valid input"/"invalid input"
+                    – reception de si l'input est valid : "valid input"/"invalid input"
                         si invalide recommencer
                         si valide écouter jusqu'à la fin du tour
      */
+
+    private void draw(int nbr_dice) {
+        try {
+            for (int i = 0; i < nbr_dice; i++) {
+                dices[i] = Integer.parseInt(in.readLine());
+                System.out.println(dices[i]);
+            }
+        } catch (Exception e) {
+            System.out.printf("Error in draw : %s%n", e);
+        }
+    }
+
+
+
+
+
+    //
+    private void recup_des() {
+        try {
+            nbr_dice = Integer.parseInt(in.readLine());
+            System.out.printf("Vous avez %d dés %n", nbr_dice);
+            draw(nbr_dice);
+        } catch (Exception e) {
+            System.out.printf("Failed to recup_dés : %s%n", e.getMessage());
+        }
+    }
+
+
+    private void jouer_tour() {
+        try {
+            do {
+                System.out.println("Still your turn");
+            } while (!in.readLine().equals("valid input"));
+        } catch(Exception e) {
+            System.out.printf("Failed to jouer tour : %s%n", e);
+        }
+    }
+
+
 
     public void run() {
         try {
@@ -106,35 +156,42 @@ public class Joe extends Thread implements ActionListener {
 
         try {
 
-            //System.out.println(in.readLine());
+            //
+            System.out.println("# Receive id number");
+            System.out.println(in.readLine());
 
-            while (true) {
-                System.out.println("# Receive id number");
-                System.out.println(in.readLine());
+            do {
 
-                System.out.println("# Receive round start message");
-                System.out.println(in.readLine());
+                lecture = in.readLine();
 
-                System.out.println("# Receive dice number");
-                int nbr_dice = Integer.parseInt(in.readLine());
-                System.out.printf("Nbr_dice=%d%n", nbr_dice);
+                switch (lecture) {
+                    case "Début round":
+                        System.out.println("Début du round " + in.readLine());
+                        recup_des();
+                        break;
+                    case "Turn":
+                        jouer_tour();
+                        break;
+                    case "NoTurn":
+                        System.out.println("Ce n'est pas votre tour");
+                        break;
+                    case "out":
+                        break;
+                    default:
+                        System.out.println(lecture);
+                        break;
+                }
+            } while(!lecture.equals("out"));
+            lecture = in.readLine();
+            do {
+                System.out.println(lecture);
+                lecture = in.readLine();
 
-                System.out.println("# Draw Dices");
-                int[] dices = new int[nbr_dice];
-                do {
-                    nbr_dice--;
-                    dices[nbr_dice] = Integer.parseInt(in.readLine());
-                    System.out.println(dices[nbr_dice]);
-                } while (nbr_dice > 0);
+            } while(!lecture.equals("endgame"));
 
-                System.out.println("# Get active player's turn");
+            System.out.println("La partie est terminée");
+            System.out.println("type 'quit' to exit");
 
-                System.out.println("# Get whether or not it is his turn");
-                String turn = in.readLine();
-                while (in.readLine().equals("NoTurn")) ;
-
-
-            }
         } catch (Exception e) {
             System.out.printf("Error during run: %s%n", e.getMessage());
         }
@@ -148,3 +205,4 @@ public class Joe extends Thread implements ActionListener {
         }
     }
 }
+
