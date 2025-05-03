@@ -1,16 +1,32 @@
 package Sauron;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.ErrorManager;
+
+import java.util.logging.*;
 
 public class Yves extends Thread {
     ErrorManager err = new ErrorManager();
+    protected static Logger logger = Logger.getLogger(Yves.class.getName());
+
+    {
+        logger.addHandler(new ConsoleHandler());
+        //* Remove one / at the beginning of the line to enable log files
+        try {
+            logger.addHandler(new FileHandler("Yves.%g.log"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        //*/
+    }
+
+
     int id;
     BufferedReader in;
     PrintWriter out;
@@ -42,7 +58,7 @@ public class Yves extends Thread {
                 – si Turn :
                     – récupère un input : "str" "Bluff" / "%d %d%n"
                     – envoie si l'input est valid : "valid input"/"invalid input"
-                        si invlaide recommencer
+                        si invalide recommencer
                         si valide écouter jusqu'à la fin du tour
      */
 
@@ -62,7 +78,10 @@ public class Yves extends Thread {
             // ajout du stream Thread → joueur à la table des stream Thread → joueurs pour que les autres Threads y aient accès
             outs[id] = out;
 
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Error", e);
         } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error", e);
             err.error("Error in initialization", e, ErrorManager.GENERIC_FAILURE);
         }
     }
@@ -73,8 +92,7 @@ public class Yves extends Thread {
         pool[id] = nbr_dice;
 
         // attend qu'il y ait au moins 3 joueurs avant de démarrer
-        while (nbr_id.get() < 3) {
-        }
+        while (nbr_id.get() < 3) ;
 
         // début du jeu
         while (!end_game) {
@@ -82,6 +100,7 @@ public class Yves extends Thread {
         }
 
         for (int i = 0; i < nbr_dice; i++) {
+            logger.log(Level.INFO, "Fin de la partie");
             out.printf("la partie  est terminée !");
         }
     }
@@ -114,9 +133,11 @@ public class Yves extends Thread {
     private void round() {
 
         // envoie au joueur que le round démarre
+        logger.info("Round %d démarre%n".formatted(nbr_round));
         out.printf("round_start_ %d%n", nbr_round);
 
         // envoie du nombre de dés au joueur
+        logger.info("%d dés envoyés%n".formatted(nbr_dice));
         out.printf("%d%n", nbr_dice);
 
         // génération de la main du joueur pour ce round
