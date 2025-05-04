@@ -16,7 +16,7 @@ public class Yves extends Thread {
     protected static Logger logger = Logger.getLogger(Yves.class.getName());
 
     //log
-    {
+    static {
         logger.addHandler(new ConsoleHandler());
         /* Remove one / at the beginning of the line to disable log files
         try {
@@ -46,6 +46,8 @@ public class Yves extends Thread {
     static int[] pool = new int[10];
     boolean elim = false;
 
+    //TODO: remplacer les sleep
+    //TODO: modifier l'init pour avoir ppas que 3 joueurs
     //TODO: ajouter les paco
     //TODO: améliorer le log
     //TODO: informer les autres joueurs quand un joueur est éliminé
@@ -100,7 +102,9 @@ public class Yves extends Thread {
         pool[id] = nbr_dice;
 
         // attend qu'il y ait au moins 3 joueurs avant de démarrer
-        while (nbr_id.get() < 3) ;
+        while (nbr_id.get() < 3) {
+            System.out.println("waiting for players");
+        }
 
         // début du jeu
         while (!end_game) {
@@ -121,7 +125,6 @@ public class Yves extends Thread {
     }
 
     // fonction qui génère une main de 1 à 5 dés
-
     private int[] draw(int nb_dice) {
         // initialisation du random et de la main
         Random rand = new Random();
@@ -134,6 +137,7 @@ public class Yves extends Thread {
         return hand;
     }
 
+    //vérifie si il faut relancer un round
     private boolean is_game_ended() {
 
         int nbr_player_not_dead = 0;
@@ -154,11 +158,11 @@ public class Yves extends Thread {
         last_action[2] = 0;
 
         // elimination du joueur si nécessaire
-        if ((nbr_dice == 0) && !elim) {
-            elim = true;
-            out.println("out");
-            out.println("vous avez perdu");
-        }
+
+
+
+
+
 
         // envoie au joueur que le round démarre
         logger.info("Round %d démarre%n".formatted(nbr_round));
@@ -193,12 +197,30 @@ public class Yves extends Thread {
             tour();
         }
 
+        // actualise le nombre de dé avant de vérifier les condition de victoire :
+        nbr_dice = pool[id];
+
+        if ((nbr_dice == 0) && !elim) {
+            elim = true;
+            out.println("out");
+            out.println("vous avez perdu");
+
+        }
+
         end_game = is_game_ended();
         if (end_game && nbr_dice != 0) {
-            out.printf("out");
+            out.println("out");
             out.println("Vous avez gagné !!");
             elim = true;
+            
         }
+
+
+
+
+
+
+
     }
 
 
@@ -219,12 +241,20 @@ public class Yves extends Thread {
                 // vérification si c'est un bluff
                 if (input.equals("Bluff")) {
 
+                    //interdit au joueur de pouvoir dire bluff au premier tour
+                    if (Arrays.equals(last_action, empty_action)) {
+                        System.out.println("invalid input");
+                        out.println("invalid input");
+
+                    //traite le bluff
+                    } else {
                     action[0] = 1;
                     action[1] = last_action[1];
                     action[2] = last_action[2];
                     action_valide = true;
                     System.out.println("valid input");
                     out.println("valid input");
+                    }
 
                     // si ce n'est pas un bluff
                 } else {
@@ -356,6 +386,7 @@ public class Yves extends Thread {
         }
     }
 
+    //joue le tour
     private void tour() {
 
         // reset des différents booléens
@@ -390,6 +421,7 @@ public class Yves extends Thread {
         }
     }
 
+    //vérifie si l'input a le bon format
     private boolean is_formated(String[] input) {
         String[] nombre = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
         boolean thisone = false;
@@ -400,6 +432,7 @@ public class Yves extends Thread {
                 for (String k : nombre) {
                     if (j.equals(k)) {
                         thisone = true;
+                        break;
                     }
                 }
                 if (!thisone) {
@@ -410,6 +443,7 @@ public class Yves extends Thread {
         return true;
     }
 
+    //transforme un input en input proccessable
     private int[] to_int_arr(String[] arr_str) {
         int[] int_arr = new int[arr_str.length];
         for (int i = 0; i < arr_str.length; i++) {

@@ -41,7 +41,7 @@ public class Joe extends Thread implements ActionListener {
     int[] dices = new int[5];
     String input = "";
     Scanner scanner = new Scanner(System.in);
-
+    String poubelle;
     private void buildUI() {
         frame.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -136,7 +136,6 @@ public class Joe extends Thread implements ActionListener {
 
 
     private void jouer_tour() {
-        System.out.println("Jouer tour");
         boolean valid = false;
         String respond;
         System.out.println("C'est votre tour !");
@@ -209,21 +208,20 @@ public class Joe extends Thread implements ActionListener {
             } while(!lecture.equals("out"));
 
             lecture = in.readLine();
-            do {
+            while (!lecture.equals("endgame")) {
                 switch (lecture) {
                     case "Début round":
                         System.out.println("Début du round " + in.readLine());
+                        poubelle = in.readLine();
                         break;
                     case "NoTurn":
-                        System.out.println("Ce n'est pas votre tour");
                         break;
                     default:
                         System.out.println(lecture);
                         break;
                 }
                 lecture = in.readLine();
-
-            } while(!lecture.equals("endgame"));
+            }
 
             System.out.println("La partie est terminée");
             System.out.println("type 'quit' to exit");
