@@ -15,14 +15,13 @@ public class Main {
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
             new Joe(socket).start();
             System.out.println("Connexion réussie!");
-            Scanner scanner = new Scanner(System.in);
-            String message = "";
-            while (!message.equals("quit")) {
-                message = scanner.nextLine();
-                out.println(message);
-            }
-            scanner.close();
-            socket.close();
+//            Scanner scanner = new Scanner(System.in);
+//            String message = "";
+//            while (!message.equals("quit")) {
+//                message = scanner.nextLine();
+//            }
+//            scanner.close();
+//            socket.close();
         } catch (Exception e) {
             err.error("Error", e, ErrorManager.GENERIC_FAILURE);
         }

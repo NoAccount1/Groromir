@@ -15,6 +15,7 @@ public class Yves extends Thread {
     ErrorManager err = new ErrorManager();
     protected static Logger logger = Logger.getLogger(Yves.class.getName());
 
+    //log
     {
         logger.addHandler(new ConsoleHandler());
         /* Remove one / at the beginning of the line to disable log files
@@ -37,6 +38,7 @@ public class Yves extends Thread {
     static int joueur_deb_round = 0;
     static int joueur_actif = 0;
     static int[] last_action = {0, 0, 0};
+    int[] empty_action = {0, 0, 0};
     static int[][] hands = new int[10][10];
     static boolean end_turn = false;
     static boolean end_round = false;
@@ -44,7 +46,7 @@ public class Yves extends Thread {
     static int[] pool = new int[10];
     boolean elim = false;
 
-
+    //TODO: ajouter les paco
     //TODO: améliorer le log
     //TODO: informer les autres joueurs quand un joueur est éliminé
 
@@ -127,7 +129,7 @@ public class Yves extends Thread {
 
         // génération de la main en fonction du nbr de dés nécéssaires
         for (int i = 0; i < nb_dice; i++) {
-            hand[i] = rand.nextInt(5) + 1;
+            hand[i] = rand.nextInt(6) + 1;
         }
         return hand;
     }
@@ -152,7 +154,7 @@ public class Yves extends Thread {
         last_action[2] = 0;
 
         // elimination du joueur si nécessaire
-        if ((nbr_dice == 0) && !elim){
+        if ((nbr_dice == 0) && !elim) {
             elim = true;
             out.println("out");
             out.println("vous avez perdu");
@@ -216,6 +218,7 @@ public class Yves extends Thread {
 
                 // vérification si c'est un bluff
                 if (input.equals("Bluff")) {
+
                     action[0] = 1;
                     action[1] = last_action[1];
                     action[2] = last_action[2];
@@ -226,20 +229,25 @@ public class Yves extends Thread {
                     // si ce n'est pas un bluff
                 } else {
 
-                    int[] action_tmp = Arrays.stream(input.split(" ")).mapToInt(Integer::parseInt).toArray();
+                    String[] action_tmp_str = input.split(" ");
+                    if (is_formated(action_tmp_str)) {
+                        int[] action_tmp = to_int_arr(action_tmp_str);
 
-                    // vérifie si l'action est valide
-                    if ((last_action[1] < action_tmp[0] || (last_action[1] == action_tmp[0] && last_action[2] < action_tmp[1])) && action_tmp[1] <= 6) {
+                        // vérifie si l'action est valide
+                        if ((last_action[1] < action_tmp[0] || (last_action[1] == action_tmp[0] && last_action[2] < action_tmp[1])) && action_tmp[1] <= 6) {
 
-                        // si l'action est valide l'intégrer au format
-                        action_valide = true;
-                        System.out.println("valid input");
-                        out.println("valid input");
-                        action[1] = action_tmp[0];
-                        action[2] = action_tmp[1];
+                            // si l'action est valide l'intégrer au format
+                            action_valide = true;
+                            System.out.println("valid input");
+                            out.println("valid input");
+                            action[1] = action_tmp[0];
+                            action[2] = action_tmp[1];
 
-                    } else {
-                        // si l'action n'est pas valide recommencer le traitement
+                        } else {
+                            // si l'action n'est pas valide recommencer le traitement
+                            out.println("invalid input");
+                        }
+                    }  else {
                         out.println("invalid input");
                     }
                 }
@@ -355,11 +363,11 @@ public class Yves extends Thread {
 
         //traitement des joueurs morts
         while (pool[joueur_actif] == 0) {
-            joueur_actif = (joueur_actif + 1)%3;
+            joueur_actif = (joueur_actif + 1) % 3;
         }
 
         // information de à qui est le tour
-        out.printf("player_turn %d%n", joueur_actif);
+        out.printf("C'est au tour du joueur %d%n", joueur_actif);
 
         // si le joueur est actif
         if (joueur_actif == id) {
@@ -380,5 +388,33 @@ public class Yves extends Thread {
                 err.error("Error in waiting round end", e, ErrorManager.GENERIC_FAILURE);
             }
         }
+    }
+
+    private boolean is_formated(String[] input) {
+        String[] nombre = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
+        boolean thisone = false;
+
+        for (String i : input) {
+            String[] tmp = i.split("");
+            for (String j : tmp) {
+                for (String k : nombre) {
+                    if (j.equals(k)) {
+                        thisone = true;
+                    }
+                }
+                if (!thisone) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private int[] to_int_arr(String[] arr_str) {
+        int[] int_arr = new int[arr_str.length];
+        for (int i = 0; i < arr_str.length; i++) {
+            int_arr[i] = Integer.parseInt(arr_str[i]);
+        }
+        return int_arr;
     }
 }

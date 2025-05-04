@@ -7,7 +7,9 @@ import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Scanner;
 
 public class Joe extends Thread implements ActionListener {
 
@@ -17,10 +19,11 @@ public class Joe extends Thread implements ActionListener {
 
     UIManager uiManager = new UIManager();
     BufferedReader in;
+    PrintWriter out;
 
     public Joe(Socket s) throws IOException {
         in = new BufferedReader(new InputStreamReader(s.getInputStream()));
-
+        out = new PrintWriter(s.getOutputStream(), true);
         frame = new JFrame("Perudonline client");
         button_submit = new JButton("Submit");
         button_bluff = new JButton("Bluff");
@@ -30,16 +33,14 @@ public class Joe extends Thread implements ActionListener {
         text_dice_amount = new JTextField(10);
     }
 
-    //TODO: mettre le scanner dans la fnc jouer_tour pour éviter les problème d'input des joueurs dont c'est pas le tour (ouverture et fermeture du scanner dans la fnc)
-    //TODO: mettre au propre l'affichage des éliminé
-    //TODO: Traiter un ppeu mieux les lectures de keyword (ex: "player_turn 1" -> "C'est le tour du joueur 1"
+    //TODO: éviter que les joueurs puisse jouer leur tour en avance
     //TODO: UI
 
     String lecture;
     int nbr_dice;
     int[] dices = new int[5];
-    boolean sortie = false;
-    boolean victoire = false;
+    String input = "";
+    Scanner scanner = new Scanner(System.in);
 
     private void buildUI() {
         frame.setLayout(new GridBagLayout());
@@ -135,15 +136,40 @@ public class Joe extends Thread implements ActionListener {
 
 
     private void jouer_tour() {
+        System.out.println("Jouer tour");
+        boolean valid = false;
+        String respond;
+        System.out.println("C'est votre tour !");
         try {
-            do {
-                System.out.println("Still your turn");
-            } while (!in.readLine().equals("valid input"));
+            while (!valid){
+                while(!scanner.hasNextLine()) {
+                    System.out.println("caca");
+                    try {
+                        sleep(500);
+                    }catch (Exception e) {
+                        System.out.printf("Error en dodo : %s%n", e);
+                    }
+                }
+                input = scanner.nextLine();
+                out.println(input);
+
+                respond = in.readLine();
+
+                if (respond.equals("valid input")) {
+                    valid = true;
+                } else {
+                    if (input.equals("Bluff")) {
+                        System.out.println("Impossible, aucun pari n'as été fait !");
+                    } else {
+                        System.out.println("L'action n'est pas reconnue.");
+                    }
+                }
+            }
         } catch(Exception e) {
             System.out.printf("Failed to jouer tour : %s%n", e);
         }
-    }
 
+    }
 
 
     public void run() {
@@ -160,9 +186,9 @@ public class Joe extends Thread implements ActionListener {
             System.out.println("# Receive id number");
             System.out.println(in.readLine());
 
-            do {
 
-                lecture = in.readLine();
+            lecture = in.readLine();
+            do {
 
                 switch (lecture) {
                     case "Début round":
@@ -175,16 +201,26 @@ public class Joe extends Thread implements ActionListener {
                     case "NoTurn":
                         System.out.println("Ce n'est pas votre tour");
                         break;
-                    case "out":
+                    default:
+                        System.out.println(lecture);
+                        break;
+                }
+                lecture = in.readLine();
+            } while(!lecture.equals("out"));
+
+            lecture = in.readLine();
+            do {
+                switch (lecture) {
+                    case "Début round":
+                        System.out.println("Début du round " + in.readLine());
+                        break;
+                    case "NoTurn":
+                        System.out.println("Ce n'est pas votre tour");
                         break;
                     default:
                         System.out.println(lecture);
                         break;
                 }
-            } while(!lecture.equals("out"));
-            lecture = in.readLine();
-            do {
-                System.out.println(lecture);
                 lecture = in.readLine();
 
             } while(!lecture.equals("endgame"));
