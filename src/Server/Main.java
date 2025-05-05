@@ -1,8 +1,7 @@
-package Sauron;
+package Server;
 
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.io.*;
 import java.util.logging.ErrorManager;
 
 public class Main {
@@ -21,7 +20,7 @@ public class Main {
 
             while (true) {
                 Socket client = ecoute.accept();
-                new Yves(id, client).start();
+                new Server_Thread(id, client).start();
                 id++;
             }
         } catch (Exception e) {

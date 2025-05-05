@@ -1,4 +1,4 @@
-package Sauron;
+package Server;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,12 +8,11 @@ import java.net.Socket;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import java.util.logging.*;
 
-public class Yves extends Thread {
+public class Server_Thread extends Thread {
     ErrorManager err = new ErrorManager();
-    protected static Logger logger = Logger.getLogger(Yves.class.getName());
+    protected static Logger logger = Logger.getLogger(Server_Thread.class.getName());
 
     //log
     static {
@@ -72,13 +71,14 @@ public class Yves extends Thread {
                         si valide écouter jusqu'à la fin du tour
      */
 
-    public Yves(int id, Socket client) {
+    //initialisation
+    public Server_Thread(int id, Socket client) {
         try {
             // génération de l'id du joueur et incrémentation du nombre de joueurs
             this.id = id;
             nbr_id.incrementAndGet();
 
-            // création des flux joueur thread et thread serveur
+            // création des flux joueur -> thread et thread -> joueur
             in = new BufferedReader(new InputStreamReader(client.getInputStream()));
             out = new PrintWriter(client.getOutputStream(), true);
 
@@ -109,7 +109,7 @@ public class Yves extends Thread {
         // début du jeu
         while (!end_game) {
 
-            //idem que pour avant le nouveau tour
+            //idem que pour avant le nouveau tour (l.189)
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {

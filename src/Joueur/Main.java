@@ -10,7 +10,7 @@ public class Main {
     public static void main(String[] args) {
         try {
             Socket socket = new Socket("127.0.0.1", 8080);
-            new Joe(socket).start();
+            new Client_Thread(socket).start();
             System.out.println("Connexion réussie!");
         } catch (Exception e) {
             err.error("Error", e, ErrorManager.GENERIC_FAILURE);
