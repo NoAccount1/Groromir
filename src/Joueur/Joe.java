@@ -11,7 +11,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Scanner;
 
-public class Client_Thread extends Thread implements ActionListener {
+public class Joe extends Thread implements ActionListener {
 
     JFrame frame;
     JButton button_submit, button_bluff, button_refresh;
@@ -21,7 +21,7 @@ public class Client_Thread extends Thread implements ActionListener {
     BufferedReader in;
     PrintWriter out;
 
-    public Client_Thread(Socket s) throws IOException {
+    public Joe(Socket s) throws IOException {
         in = new BufferedReader(new InputStreamReader(s.getInputStream()));
         out = new PrintWriter(s.getOutputStream(), true);
         frame = new JFrame("Perudonline client");

@@ -1,4 +1,4 @@
-package Server;
+package Sauron;
 
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -20,7 +20,7 @@ public class Main {
 
             while (true) {
                 Socket client = ecoute.accept();
-                new Server_Thread(id, client).start();
+                new Yves(id, client).start();
                 id++;
             }
         } catch (Exception e) {

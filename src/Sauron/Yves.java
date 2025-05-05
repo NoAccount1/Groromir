@@ -1,4 +1,4 @@
-package Server;
+package Sauron;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,9 +10,9 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.*;
 
-public class Server_Thread extends Thread {
+public class Yves extends Thread {
     ErrorManager err = new ErrorManager();
-    protected static Logger logger = Logger.getLogger(Server_Thread.class.getName());
+    protected static Logger logger = Logger.getLogger(Yves.class.getName());
 
     //log
     static {
@@ -72,7 +72,7 @@ public class Server_Thread extends Thread {
      */
 
     //initialisation
-    public Server_Thread(int id, Socket client) {
+    public Yves(int id, Socket client) {
         try {
             // génération de l'id du joueur et incrémentation du nombre de joueurs
             this.id = id;
