@@ -1,7 +1,7 @@
 package Joueur;
 
 import javax.swing.*;
-import java.awt.*;
+//import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
@@ -17,7 +17,7 @@ public class Client_Thread extends Thread implements ActionListener {
     JButton button_submit, button_bluff, button_refresh;
     JTextField text_dice_number, text_dice_type, text_dice_amount;
 
-    UIManager uiManager = new UIManager();
+    // UIManager uiManager = new UIManager();
     BufferedReader in;
     PrintWriter out;
 
@@ -42,6 +42,8 @@ public class Client_Thread extends Thread implements ActionListener {
     String input = "";
     Scanner scanner = new Scanner(System.in);
     String poubelle;
+
+    /* ui test
     private void buildUI() {
         frame.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -86,26 +88,28 @@ public class Client_Thread extends Thread implements ActionListener {
         frame.setVisible(true);
     }
 
+     */
+
     /*     Initialisation du thread :
                 – reception de l'id ; str "osef"
 
             Début round :
-                – reception de  info round début : str "Début round"
+                – reception de l'info round début : str "Début round"
                 – reception du nombre de dés : str "%d%n"
                     _stockage
-                – reception des dés du joueurs : str "%d%n" x nombre de dés envoyés au-dessus
+                – reception des dés du joueur : str "%d%n" x nombre de dés envoyés au-dessus
                     _stockage
                     _affichage
 
             Début tour :
                 – reception de l'Id du joueur actif
-                – reception de si c'est le tour du joueur : "Turn" / "NoTurn"
+                – reception du tour du joueur : "Turn" / "NoTurn"
                 – si NoTrun : attendre la fin du tour en écoutant
                 – si Turn :
                     – envoie de l'input : str "Bluff" / "%d %d%n"
                     – reception de si l'input est valid : "valid input"/"invalid input"
                         si invalide recommencer
-                        si valide écouter jusqu'à la fin du tour
+                        si valide, écouter jusqu'à la fin du tour
      */
 
     private void draw(int nbr_dice) {
@@ -144,7 +148,7 @@ public class Client_Thread extends Thread implements ActionListener {
                 while(!scanner.hasNextLine()) {
                     System.out.println("caca");
                     try {
-                        sleep(500);
+                        wait(500);
                     }catch (Exception e) {
                         System.out.printf("Error en dodo : %s%n", e);
                     }

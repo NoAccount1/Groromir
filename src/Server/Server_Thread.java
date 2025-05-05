@@ -43,10 +43,10 @@ public class Server_Thread extends Thread {
     static boolean end_round = false;
     static boolean end_game = false;
     static int[] pool = new int[10];
-    boolean elim = false;
+    boolean eliminate = false;
 
     //TODO: remplacer les sleep
-    //TODO: modifier l'init pour avoir ppas que 3 joueurs
+    //TODO: modifier l'init pour avoir plus que 3 joueurs
     //TODO: ajouter les paco
     //TODO: améliorer le log
     //TODO: informer les autres joueurs quand un joueur est éliminé
@@ -62,13 +62,13 @@ public class Server_Thread extends Thread {
 
             Début tour :
                 – envoie de l'Id du joueur actif
-                – envoie de si c'est le tour du joueur : "Turn" / "NoTurn"
+                – envoie du tour du joueur : "Turn" / "NoTurn"
                 – si NoTrun : attendre la din du tour en écoutant
                 – si Turn :
                     – récupère un input : strSS "Bluff" / "%d %d%n"
                     – envoie si l'input est valid : "valid input"/"invalid input"
                         si invalide recommencer
-                        si valide écouter jusqu'à la fin du tour
+                        si valide, écouter jusqu'à la fin du tour
      */
 
     //initialisation
@@ -111,7 +111,7 @@ public class Server_Thread extends Thread {
 
             //idem que pour avant le nouveau tour (l.189)
             try {
-                Thread.sleep(100);
+                wait(100);
             } catch (InterruptedException e) {
                 err.error("Error in sleep while waiting round", e, ErrorManager.GENERIC_FAILURE);
             }
@@ -137,7 +137,7 @@ public class Server_Thread extends Thread {
         return hand;
     }
 
-    //vérifie si il faut relancer un round
+    //vérifie s'il faut relancer un round
     private boolean is_game_ended() {
 
         int nbr_player_not_dead = 0;
@@ -188,7 +188,7 @@ public class Server_Thread extends Thread {
 
             // sleep pour éviter que des joueurs soient bloqués dans le tour précédent
             try {
-                Thread.sleep(100);
+                wait(100);
             } catch (InterruptedException e) {
                 err.error("Error in sleep while waiting round", e, ErrorManager.GENERIC_FAILURE);
             }
@@ -197,11 +197,11 @@ public class Server_Thread extends Thread {
             tour();
         }
 
-        // actualise le nombre de dé avant de vérifier les condition de victoire :
+        // actualise le nombre de dés avant de vérifier les conditions de victoire :
         nbr_dice = pool[id];
 
-        if ((nbr_dice == 0) && !elim) {
-            elim = true;
+        if ((nbr_dice == 0) && !eliminate) {
+            eliminate = true;
             out.println("out");
             out.println("vous avez perdu");
 
@@ -211,7 +211,7 @@ public class Server_Thread extends Thread {
         if (end_game && nbr_dice != 0) {
             out.println("out");
             out.println("Vous avez gagné !!");
-            elim = true;
+            eliminate = true;
             
         }
 
@@ -224,7 +224,7 @@ public class Server_Thread extends Thread {
     }
 
 
-    // fonction qui prend l'input et le transforme en info processable sous forme de tables de 3 int, [0]: bluff ou pas; [1]: nombre d'itération; [2]: chiffre du dé;
+    // fonction qui prend l'input et le transforme en info processable sous forme de tables de 3 int, [0] : bluff ou pas ; [1] : nombre d'itérations ; [2] : chiffre du dé ;
     private void traitement_input() {
 
         // génération de l'action
@@ -288,7 +288,7 @@ public class Server_Thread extends Thread {
         last_action = action;
     }
 
-    //prends en paramètre une action formatée sous la forme de la fonction au-dessus et fait ce que l'action est sensé faire
+    //prends en paramètre une action formatée sous la forme de la fonction au-dessus et fait ce que l'action est censé faire
     private void traitement_action(int[] action) {
 
         if (!(action[0] == 1)) {
@@ -318,7 +318,7 @@ public class Server_Thread extends Thread {
         }
     }
 
-    // fonction qui compte le nombre d'itération d'un chiffre dans la pool totale
+    // fonction qui compte le nombre d'itérations d'un chiffre dans la pool totale
     private int compte_iteration(int chiffre) {
 
         // compte le nombre d'itérations d'un chiffre totales dans la pool
@@ -353,7 +353,7 @@ public class Server_Thread extends Thread {
         return nbr_ite < nbr_vise;
     }
 
-    // effectue les action inhérentesau bluff
+    // effectue les actions inhérentesau bluff
     private void solve_bluff(int[] action) {
 
         // si le bluff est valide
@@ -414,7 +414,7 @@ public class Server_Thread extends Thread {
         }
         while (!end_turn) {
             try {
-                Thread.sleep(100);
+                wait(100);
             } catch (InterruptedException e) {
                 err.error("Error in waiting round end", e, ErrorManager.GENERIC_FAILURE);
             }
