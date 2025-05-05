@@ -1,5 +1,7 @@
 package Sauron;
 
+import utils.LogFormatter;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -16,14 +18,9 @@ public class Yves extends Thread {
 
     //log
     static {
-        logger.addHandler(new ConsoleHandler());
-        /* Remove one / at the beginning of the line to disable log files
-        try {
-            logger.addHandler(new FileHandler("Yves.%g.log"));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        //*/
+        ConsoleHandler handler = new ConsoleHandler();
+        handler.setFormatter(new LogFormatter());
+        logger.addHandler(handler);
     }
 
 
@@ -103,7 +100,7 @@ public class Yves extends Thread {
 
         // attend qu'il y ait au moins 3 joueurs avant de démarrer
         while (nbr_id.get() < 3) {
-            System.out.println("waiting for players");
+//            System.out.println("waiting for players");
         }
 
         // début du jeu
@@ -111,7 +108,7 @@ public class Yves extends Thread {
 
             //idem que pour avant le nouveau tour (l.189)
             try {
-                wait(100);
+                sleep(100);
             } catch (InterruptedException e) {
                 err.error("Error in sleep while waiting round", e, ErrorManager.GENERIC_FAILURE);
             }
@@ -119,7 +116,7 @@ public class Yves extends Thread {
             round();
         }
 
-        logger.log(Level.INFO, "Fin de la partie");
+        logger.info("Fin de la partie");
         out.printf("endgame%n");
 
     }
@@ -188,7 +185,7 @@ public class Yves extends Thread {
 
             // sleep pour éviter que des joueurs soient bloqués dans le tour précédent
             try {
-                wait(100);
+                sleep(100);
             } catch (InterruptedException e) {
                 err.error("Error in sleep while waiting round", e, ErrorManager.GENERIC_FAILURE);
             }
@@ -212,7 +209,7 @@ public class Yves extends Thread {
             out.println("out");
             out.println("Vous avez gagné !!");
             eliminate = true;
-            
+
         }
 
 
@@ -414,7 +411,7 @@ public class Yves extends Thread {
         }
         while (!end_turn) {
             try {
-                wait(100);
+                sleep(100);
             } catch (InterruptedException e) {
                 err.error("Error in waiting round end", e, ErrorManager.GENERIC_FAILURE);
             }
